@@ -28,5 +28,13 @@ steps:
     workingDirectory: '$(System.DefaultWorkingDirectory)/parent'
     environmentServiceNameAzureRM: 'SPN_Bhawesh'
 
+- task: TerraformTask@5
+  inputs:
+    provider: 'azurerm'
+    command: 'apply'
+    workingDirectory: '$(System.DefaultWorkingDirectory)/parent'
+    commandOptions: '-auto-approve'
+    environmentServiceNameAzureRM: 'SPN_Bhawesh'
+
 
 
