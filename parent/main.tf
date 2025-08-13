@@ -12,5 +12,5 @@ module "aks_cluster" {
   resource_group_location = "WestUS"
   azurerm_kubernetes_cluster  = "bhawesh_aks_cluster"
   dns_prefix              = "bhaweshdns"
-  kubernetes_version      = "1.32.7"
+  kubernetes_version      = "1.32.6"
 }
