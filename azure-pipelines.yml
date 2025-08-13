@@ -21,5 +21,12 @@ steps:
     backendAzureRmContainerName: 'bhawesh-tfstate'
     backendAzureRmKey: 'aks.tfstate'
 
+- task: TerraformTask@5
+  inputs:
+    provider: 'azurerm'
+    command: 'plan'
+    workingDirectory: '$(System.DefaultWorkingDirectory)/parent'
+    environmentServiceNameAzureRM: 'SPN_Bhawesh'
+
 
 
