@@ -9,17 +9,17 @@ steps:
   inputs:
     terraformVersion: 'latest'
 
-# - task: TerraformTask@5
-#   inputs:
-#     provider: 'azurerm'
-#     command: 'init'
-#     backendServiceArm: 'SPN_Bhawesh'
-#     backendAzureRmOverrideSubscriptionID: '9f199aee-1ad7-464f-bd74-4b88ef990086'
-#     backendAzureRmResourceGroupName: 'stg_rg'
-#     workingDirectory: '$(System.DefaultWorkingDirectory)/parent'
-#     backendAzureRmStorageAccountName: 'backednstg'
-#     backendAzureRmContainerName: 'bhawesh-tfstate'
-#     backendAzureRmKey: 'aks.tfstate'
+- task: TerraformTask@5
+  inputs:
+    provider: 'azurerm'
+    command: 'init'
+    backendServiceArm: 'SPN_Bhawesh'
+    backendAzureRmOverrideSubscriptionID: '9f199aee-1ad7-464f-bd74-4b88ef990086'
+    backendAzureRmResourceGroupName: 'stg_rg'
+    workingDirectory: '$(System.DefaultWorkingDirectory)/parent'
+    backendAzureRmStorageAccountName: 'backednstg'
+    backendAzureRmContainerName: 'bhawesh-tfstate'
+    backendAzureRmKey: 'aks.tfstate'
 
 # - task: TerraformTask@5
 #   inputs:
