@@ -21,12 +21,12 @@ steps:
     backendAzureRmContainerName: 'bhawesh-tfstate'
     backendAzureRmKey: 'aks.tfstate'
 
-# - task: TerraformTask@5
-#   inputs:
-#     provider: 'azurerm'
-#     command: 'plan'
-#     workingDirectory: '$(System.DefaultWorkingDirectory)/parent'
-#     environmentServiceNameAzureRM: 'SPN_Bhawesh'
+- task: TerraformTask@5
+  inputs:
+    provider: 'azurerm'
+    command: 'plan'
+    workingDirectory: '$(System.DefaultWorkingDirectory)/parent'
+    environmentServiceNameAzureRM: 'SPN_Bhawesh'
 
 # - task: TerraformTask@5
 #   inputs:
@@ -36,12 +36,12 @@ steps:
 #     commandOptions: '-auto-approve'
 #     environmentServiceNameAzureRM: 'SPN_Bhawesh'
 
-- task: TerraformTask@5
-  inputs:
-    provider: 'azurerm'
-    command: 'destroy'
-    workingDirectory: '$(System.DefaultWorkingDirectory)/parent'
-    environmentServiceNameAzureRM: 'SPN_Bhawesh'
+# - task: TerraformTask@5
+#   inputs:
+#     provider: 'azurerm'
+#     command: 'destroy'
+#     workingDirectory: '$(System.DefaultWorkingDirectory)/parent'
+#     environmentServiceNameAzureRM: 'SPN_Bhawesh'
 
 
 
