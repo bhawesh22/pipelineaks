@@ -4,44 +4,42 @@ trigger:
 pool:
   name: bhaweshnew
 
+variables:
+  terraformWorkingDir: '$(System.DefaultWorkingDirectory)/parent'
+  azureServiceConnection: 'SPN_Bhawesh'
+
 steps:
 - task: TerraformInstaller@1
   inputs:
     terraformVersion: 'latest'
 
 - task: TerraformTask@5
+  name: TerraformInit
   inputs:
     provider: 'azurerm'
     command: 'init'
-    backendServiceArm: 'SPN_Bhawesh'
+    backendServiceArm: '$(azureServiceConnection)'
     backendAzureRmOverrideSubscriptionID: '9f199aee-1ad7-464f-bd74-4b88ef990086'
     backendAzureRmResourceGroupName: 'G20_RG'
-    workingDirectory: '$(System.DefaultWorkingDirectory)/parent'
+    workingDirectory: '$(terraformWorkingDir)'
     backendAzureRmStorageAccountName: 'g20stg'
     backendAzureRmContainerName: 'bhawesh-tfstate'
     backendAzureRmKey: 'aks.tfstate'
 
 - task: TerraformTask@5
+  name: TerraformPlan
   inputs:
     provider: 'azurerm'
     command: 'plan'
-    workingDirectory: '$(System.DefaultWorkingDirectory)/parent'
-    environmentServiceNameAzureRM: 'SPN_Bhawesh'
+    workingDirectory: '$(terraformWorkingDir)'
+    environmentServiceNameAzureRM: '$(azureServiceConnection)'
 
-# - task: TerraformTask@5
-#   inputs:
-#     provider: 'azurerm'
-#     command: 'apply'
-#     workingDirectory: '$(System.DefaultWorkingDirectory)/parent'
-#     commandOptions: '-auto-approve'
-#     environmentServiceNameAzureRM: 'SPN_Bhawesh'
-
-# - task: TerraformTask@5
-#   inputs:
-#     provider: 'azurerm'
-#     command: 'destroy'
-#     workingDirectory: '$(System.DefaultWorkingDirectory)/parent'
-#     environmentServiceNameAzureRM: 'SPN_Bhawesh'
-
-
-
+- task: TerraformTask@5
+  name: TerraformApply
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+  inputs:
+    provider: 'azurerm'
+    command: 'apply'
+    commandOptions: '-auto-approve'
+    workingDirectory: '$(terraformWorkingDir)'
+    environmentServiceNameAzureRM: '$(azureServiceConnection)'
