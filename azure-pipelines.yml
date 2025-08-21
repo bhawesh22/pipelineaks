@@ -34,14 +34,6 @@ steps:
     workingDirectory: '$(terraformWorkingDir)'
     environmentServiceNameAzureRM: '$(azureServiceConnection)'
 
-# 👇 Add this script step — runs only if plan fails
-- script: |
-    echo "⚠️ Terraform Plan failed. Running force-unlock..."
-    terraform init
-    terraform force-unlock bbd3c6aa-401c-6e72-f35d-b9fd964ddd64
-  displayName: 'Force Unlock Terraform State (on plan failure)'
-  workingDirectory: '$(terraformWorkingDir)'
-  condition: failed()
 
 - task: TerraformTask@5
   name: TerraformApply
