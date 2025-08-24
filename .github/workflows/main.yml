@@ -1,0 +1,14 @@
+name: Self-Hosted Runner Test
+
+on:
+  push:
+    branches:
+      - main 
+
+jobs:
+  test-on-self-hosted:
+    runs-on: BHAWESH 
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
