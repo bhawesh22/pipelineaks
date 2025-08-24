@@ -1,14 +1,23 @@
-name: Self-Hosted Runner Test
+name: Terraform Init on Runner BHAWESH
 
 on:
+  workflow_dispatch:  # Manually run kar sakte ho
   push:
     branches:
-      - main 
+      - main           # ya jab main branch par push ho
 
 jobs:
-  test-on-self-hosted:
-    runs-on: BHAWESH 
+  terraform-init:
+    runs-on: [self-hosted, BHAWESH]  # ✅ Specific runner ka naam
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.6  # Apne version ke hisaab se
+
+      - name: Terraform Init
+        run: terraform init
