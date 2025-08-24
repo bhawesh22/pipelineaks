@@ -8,39 +8,59 @@ variables:
   terraformWorkingDir: '$(System.DefaultWorkingDirectory)/parent'
   azureServiceConnection: 'SPN_Bhawesh'
 
-steps:
-- task: TerraformInstaller@1
-  inputs:
-    terraformVersion: 'latest'
+stages:
+- stage: TerraformBuild
+  displayName: "Terraform Install, Init & Plan"
+  jobs:
+  - job: TerraformJob
+    displayName: "Run Terraform Install, Init and Plan"
+    steps:
+    - task: TerraformInstaller@1
+      displayName: "Install Terraform"
+      inputs:
+        terraformVersion: 'latest'
 
-- task: TerraformTask@5
-  name: TerraformInit
-  inputs:
-    provider: 'azurerm'
-    command: 'init'
-    backendServiceArm: '$(azureServiceConnection)'
-    backendAzureRmOverrideSubscriptionID: '9f199aee-1ad7-464f-bd74-4b88ef990086'
-    backendAzureRmResourceGroupName: 'G20_RG'
-    workingDirectory: '$(terraformWorkingDir)'
-    backendAzureRmStorageAccountName: 'g20stg'
-    backendAzureRmContainerName: 'bhawesh-tfstate'
-    backendAzureRmKey: 'aks.tfstate'
+    - task: TerraformTask@5
+      displayName: "Terraform Init"
+      name: TerraformInit
+      inputs:
+        provider: 'azurerm'
+        command: 'init'
+        backendServiceArm: '$(azureServiceConnection)'
+        backendAzureRmOverrideSubscriptionID: '9f199aee-1ad7-464f-bd74-4b88ef990086'
+        backendAzureRmResourceGroupName: 'G20_RG'
+        workingDirectory: '$(terraformWorkingDir)'
+        backendAzureRmStorageAccountName: 'g20stg'
+        backendAzureRmContainerName: 'bhawesh-tfstate'
+        backendAzureRmKey: 'aks.tfstate'
 
-- task: TerraformTask@5
-  name: TerraformPlan
-  inputs:
-    provider: 'azurerm'
-    command: 'plan'
-    workingDirectory: '$(terraformWorkingDir)'
-    environmentServiceNameAzureRM: '$(azureServiceConnection)'
+    - task: TerraformTask@5
+      displayName: "Terraform Plan"
+      name: TerraformPlan
+      inputs:
+        provider: 'azurerm'
+        command: 'plan'
+        workingDirectory: '$(terraformWorkingDir)'
+        environmentServiceNameAzureRM: '$(azureServiceConnection)'
+        
+- stage: SecurityScan
+  displayName: "Terraform Security Scan"
+  dependsOn: TerraformBuild
+  jobs:
+  - job: ScanJob
+    displayName: "Run Terraform Security Scan"
+    steps:
+    - script: |
+        echo "Running terraform security scan..."
+        # Yahan apna scan command ya tool daalo, e.g., tflint, tfsec, etc.
+        # Example: tfsec $(terraformWorkingDir)
+      displayName: "Terraform Security Scan Step"
 
-
-- task: TerraformTask@5
-  name: TerraformApply
-  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
-  inputs:
-    provider: 'azurerm'
-    command: 'apply'
-    commandOptions: '-auto-approve'
-    workingDirectory: '$(terraformWorkingDir)'
-    environmentServiceNameAzureRM: '$(azureServiceConnection)'
+- stage: TerraformApply
+  displayName: "Terraform Apply with Manual Approval"
+  dependsOn: SecurityScan
+  condition: succeeded()
+  jobs:
+  - deployment: ApplyJob
+    displayName: "Deploy Terraform Apply"
+    environment: 'production'  # Manual approval prompt ke
