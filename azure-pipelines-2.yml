@@ -1,90 +1,95 @@
 trigger:
   none
-  # branches:
-  #   include:
-  #     - feature/*
-  #     - main
+
 variables:
   terraformWorkingDir: '$(System.DefaultWorkingDirectory)/parent'
   azureServiceConnection: 'SPN_Bhawesh'
-jobs:
-- job: TerraformInitPlan
-  displayName: Terraform Init and Plan
-  pool:
-    name: bhaweshnew
 
-  steps:
-    - checkout: self
+stages:
+- stage: TerraformInitPlan
+  displayName: 'Terraform Init & Plan'
+  jobs:
+  - job: TerraformInitPlan
+    displayName: Init & Plan
+    pool:
+      name: bhaweshnew
+    steps:
+      - checkout: self
 
-    - task: TerraformInstaller@1
-      displayName: Install Terraform
-      inputs:
-        terraformVersion: 'latest'
+      - task: TerraformInstaller@1
+        displayName: Install Terraform
+        inputs:
+          terraformVersion: 'latest'
 
-    - task: TerraformTask@5
-      displayName: Terraform Init
-      inputs:
-        provider: 'azurerm'
-        command: 'init'
-        workingDirectory: '$(terraformWorkingDir)'
-        backendServiceArm: '$(azureServiceConnection)'
-        backendAzureRmResourceGroupName: 'G20_RG'
-        backendAzureRmStorageAccountName: 'g20stg'
-        backendAzureRmContainerName: 'bhawesh-tfstate'
-        backendAzureRmKey: 'aks.tfstate'
+      - task: TerraformTask@5
+        displayName: Terraform Init
+        inputs:
+          provider: 'azurerm'
+          command: 'init'
+          workingDirectory: '$(terraformWorkingDir)'
+          backendServiceArm: '$(azureServiceConnection)'
+          backendAzureRmResourceGroupName: 'G20_RG'
+          backendAzureRmStorageAccountName: 'g20stg'
+          backendAzureRmContainerName: 'bhawesh-tfstate'
+          backendAzureRmKey: 'aks.tfstate'
 
-    - task: TerraformTask@5
-      displayName: Terraform Plan
-      inputs:
-        provider: 'azurerm'
-        command: 'plan'
-        workingDirectory: '$(terraformWorkingDir)'
-        environmentServiceNameAzureRM: '$(azureServiceConnection)'
+      - task: TerraformTask@5
+        displayName: Terraform Plan
+        inputs:
+          provider: 'azurerm'
+          command: 'plan'
+          workingDirectory: '$(terraformWorkingDir)'
+          environmentServiceNameAzureRM: '$(azureServiceConnection)'
 
-- job: ManualValidation
-  displayName: Manual Approval Step
+- stage: ManualValidationReview
+  displayName: 'Manual Approval'
   dependsOn: TerraformInitPlan
-  pool:
-    name: server
+  jobs:
+  - job: ManualValidation
+    displayName: 'Manual Validation'
+    pool:
+      name: server
+    steps:
+      - task: ManualValidation@1
+        displayName: 'Await Manual Approval'
+        inputs:
+          notifyUsers: 'bhawesh.mishra@reewasolutions.com'
+          approvers: 'bhawesh.mishra@reewasolutions.com'
+          instructions: 'pass kar dena'
 
-  steps:
-    - task: ManualValidation@1
-      inputs:
-        notifyUsers: 'bhawesh.mishra@reewasolutions.com'
-        approvers: 'bhawesh.mishra@reewasolutions.com'
-        instructions: 'pass kar dena'
+- stage: TerraformApply
+  displayName: 'Terraform Apply'
+  dependsOn: ManualValidationReview
+  jobs:
+  - job: TerraformApply
+    displayName: Apply Infrastructure
+    pool:
+      name: bhaweshnew
+    steps:
+      - checkout: self
 
-- job: TerraformApply
-  displayName: Terraform Apply
-  dependsOn: ManualValidation
-  pool:
-    name: bhaweshnew
+      - task: TerraformInstaller@1
+        displayName: Install Terraform
+        inputs:
+          terraformVersion: 'latest'
 
-  steps:
-    - checkout: self
-    
+      - task: TerraformTask@5
+        displayName: Terraform Init
+        inputs:
+          provider: 'azurerm'
+          command: 'init'
+          workingDirectory: '$(terraformWorkingDir)'
+          backendServiceArm: '$(azureServiceConnection)'
+          backendAzureRmResourceGroupName: 'G20_RG'
+          backendAzureRmStorageAccountName: 'g20stg'
+          backendAzureRmContainerName: 'bhawesh-tfstate'
+          backendAzureRmKey: 'aks.tfstate'
 
-    - task: TerraformInstaller@1
-      displayName: Install Terraform
-      inputs:
-        terraformVersion: 'latest'
-    - task: TerraformTask@5
-      displayName: Terraform Init
-      inputs:
-        provider: 'azurerm'
-        command: 'init'
-        workingDirectory: '$(terraformWorkingDir)'
-        backendServiceArm: '$(azureServiceConnection)'
-        backendAzureRmResourceGroupName: 'G20_RG'
-        backendAzureRmStorageAccountName: 'g20stg'
-        backendAzureRmContainerName: 'bhawesh-tfstate'
-        backendAzureRmKey: 'aks.tfstate' 
-
-    - task: TerraformTask@5
-      displayName: Terraform Apply
-      inputs:
-        provider: 'azurerm'
-        command: 'apply'
-        workingDirectory: '$(terraformWorkingDir)'
-        commandOptions: '-auto-approve'
-        environmentServiceNameAzureRM: '$(azureServiceConnection)'
+      - task: TerraformTask@5
+        displayName: Terraform Apply
+        inputs:
+          provider: 'azurerm'
+          command: 'apply'
+          workingDirectory: '$(terraformWorkingDir)'
+          commandOptions: '-auto-approve'
+          environmentServiceNameAzureRM: '$(azureServiceConnection)'
