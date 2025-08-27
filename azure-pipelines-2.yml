@@ -48,3 +48,16 @@ jobs:
         notifyUsers: 'bhawesh.mishra@reewasolutions.com'
         approvers: 'bhawesh.mishra@reewasolutions.com'
         instructions: 'pass kar dena'
+
+- job: Terraformapply
+  displayName: terraform apply
+  dependsOn: ManualValidation
+  pool: bhaweshnew
+  steps:
+  - task: TerraformTask@5
+    inputs:
+      provider: 'azurerm'
+      command: 'apply'
+      workingDirectory: '$(System.DefaultWorkingDirectory)parent'
+      commandOptions: '-auto-approve'
+      environmentServiceNameAzureRM: 'SPN_Bhawesh'
