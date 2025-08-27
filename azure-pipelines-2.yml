@@ -1,0 +1,41 @@
+
+trigger:
+ branches:
+   include:
+     - feature/*
+     - main
+
+variables:
+  terraformWorkingDir: '$(System.DefaultWorkingDirectory)/parent'
+  azureServiceConnection: 'SPN_Bhawesh'
+
+jobs:
+  - job: terraform install
+    displayName: terraform install
+    pool :
+     name :bhaweshnew
+    steps:
+      - 
+- task: TerraformInstaller@1
+  inputs:
+    terraformVersion: 'latest'
+    steps :
+    - task: TerraformTask@5
+      inputs:
+        provider: 'azurerm'
+        command: 'init'
+        workingDirectory: '$(terraformWorkingDir)'
+        backendServiceArm: 'SPN_Bhawesh'
+        backendAzureRmResourceGroupName: 'G20_RG'
+        backendAzureRmStorageAccountName: 'g20stg'
+        backendAzureRmContainerName: 'bhawesh-tfstate'
+        backendAzureRmKey: 'aks.tfstate'
+
+    steps :
+    - task: TerraformTask@5
+      inputs:
+        provider: 'azurerm'
+        command: 'plan'
+        workingDirectory: '$(terraformWorkingDir)'
+        environmentServiceNameAzureRM: 'SPN_Bhawesh'
+
