@@ -62,11 +62,23 @@ jobs:
 
   steps:
     - checkout: self
+    
 
     - task: TerraformInstaller@1
       displayName: Install Terraform
       inputs:
         terraformVersion: 'latest'
+    - task: TerraformTask@5
+      displayName: Terraform Init
+      inputs:
+        provider: 'azurerm'
+        command: 'init'
+        workingDirectory: '$(terraformWorkingDir)'
+        backendServiceArm: '$(azureServiceConnection)'
+        backendAzureRmResourceGroupName: 'G20_RG'
+        backendAzureRmStorageAccountName: 'g20stg'
+        backendAzureRmContainerName: 'bhawesh-tfstate'
+        backendAzureRmKey: 'aks.tfstate' 
 
     - task: TerraformTask@5
       displayName: Terraform Apply
