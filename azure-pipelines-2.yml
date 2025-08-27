@@ -4,18 +4,23 @@ trigger:
   #   include:
   #     - feature/*
   #     - main
-
 variables:
   terraformWorkingDir: '$(System.DefaultWorkingDirectory)/parent'
   azureServiceConnection: 'SPN_Bhawesh'
-
 jobs:
 - job: TerraformInitPlan
   displayName: Terraform Init and Plan
-  pool: 
+  pool:
     name: bhaweshnew
 
   steps:
+    - checkout: self
+
+    - task: TerraformInstaller@1
+      displayName: Install Terraform
+      inputs:
+        terraformVersion: 'latest'
+
     - task: TerraformTask@5
       displayName: Terraform Init
       inputs:
@@ -49,18 +54,25 @@ jobs:
         approvers: 'bhawesh.mishra@reewasolutions.com'
         instructions: 'pass kar dena'
 
-- job: Terraformapply
-  displayName: terraform apply
+- job: TerraformApply
+  displayName: Terraform Apply
   dependsOn: ManualValidation
-  pool: bhaweshnew
+  pool:
+    name: bhaweshnew
+
   steps:
-  - task: TerraformInstaller@1
-    inputs:
-      terraformVersion: 'latest'
-  - task: TerraformTask@5
-    inputs:
-      provider: 'azurerm'
-      command: 'apply'
-      workingDirectory: '$(System.DefaultWorkingDirectory)parent'
-      commandOptions: '-auto-approve'
-      environmentServiceNameAzureRM: 'SPN_Bhawesh'
+    - checkout: self
+
+    - task: TerraformInstaller@1
+      displayName: Install Terraform
+      inputs:
+        terraformVersion: 'latest'
+
+    - task: TerraformTask@5
+      displayName: Terraform Apply
+      inputs:
+        provider: 'azurerm'
+        command: 'apply'
+        workingDirectory: '$(terraformWorkingDir)'
+        commandOptions: '-auto-approve'
+        environmentServiceNameAzureRM: '$(azureServiceConnection)'
